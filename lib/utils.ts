@@ -1,11 +1,14 @@
 import { prisma } from './prisma'
 
 /**
- * Get or create a user by username
+ * Get or create a user by username (case-insensitive)
  */
 export async function getOrCreateUser(username: string) {
+  // Normalize username to lowercase
+  const normalizedUsername = username.toLowerCase().trim()
+
   const user = await prisma.user.findUnique({
-    where: { username },
+    where: { username: normalizedUsername },
   })
 
   if (user) {
@@ -16,7 +19,7 @@ export async function getOrCreateUser(username: string) {
   const globalState = await getGlobalState()
   return await prisma.user.create({
     data: {
-      username,
+      username: normalizedUsername,
       currentPosition: globalState.currentDay,
     },
   })
@@ -45,11 +48,20 @@ export async function getGlobalState() {
 }
 
 /**
- * Get the album for a specific position
+ * Get the album for a specific position (original import order)
  */
 export async function getAlbumByPosition(position: number) {
   return await prisma.album.findUnique({
     where: { position },
+  })
+}
+
+/**
+ * Get the album for a specific random position (generation order)
+ */
+export async function getAlbumByRandomPosition(randomPosition: number) {
+  return await prisma.album.findUnique({
+    where: { randomPosition },
   })
 }
 
@@ -91,15 +103,16 @@ export async function getUserCurrentState(username: string) {
   const user = await getOrCreateUser(username)
   const globalState = await getGlobalState()
 
-  // Find the first unrated album from their current position backward
+  // Find the first unrated album from their current position backward (using randomPosition)
   const albums = await prisma.album.findMany({
     where: {
-      position: {
+      randomPosition: {
         lte: user.currentPosition,
+        not: null,
       },
     },
     orderBy: {
-      position: 'desc',
+      randomPosition: 'desc',
     },
     include: {
       ratings: {
@@ -116,7 +129,7 @@ export async function getUserCurrentState(username: string) {
 
   if (unratedAlbum) {
     // User needs to rate this album
-    const canRate = unratedAlbum.position < globalState.currentDay
+    const canRate = (unratedAlbum.randomPosition ?? 0) < globalState.currentDay
 
     return {
       mode: canRate ? 'rating' : 'listening' as const,
@@ -128,7 +141,7 @@ export async function getUserCurrentState(username: string) {
   }
 
   // User is caught up - show today's album
-  const todayAlbum = await getAlbumByPosition(globalState.currentDay)
+  const todayAlbum = await getAlbumByRandomPosition(globalState.currentDay)
 
   if (!todayAlbum) {
     return {

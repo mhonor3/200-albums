@@ -22,7 +22,8 @@ model GlobalState {
 // Album catalog from CSV
 model Album {
   id            Int       @id @default(autoincrement())
-  position      Int       @unique // 1 to N (sequential order)
+  position      Int       @unique // 1 to N (sequential order in original import)
+  randomPosition Int?     @unique // Random order for generation (1 to N, set once)
   artist        String
   title         String
   releaseYear   Int
@@ -40,6 +41,7 @@ model Album {
   listeningNotes ListeningNote[]
 
   @@index([position])
+  @@index([randomPosition])
   @@index([artist])
   @@index([genre])
   @@map("albums")

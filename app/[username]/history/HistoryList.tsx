@@ -64,36 +64,39 @@ export default function HistoryList({ albums, username }: HistoryListProps) {
           />
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap sm:flex-nowrap">
           <button
             onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-lg font-medium transition ${
+            className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition ${
               filter === 'all'
                 ? 'bg-blue-600 text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
           >
-            All ({albums.length})
+            <span className="hidden sm:inline">All ({albums.length})</span>
+            <span className="sm:hidden">All</span>
           </button>
           <button
             onClick={() => setFilter('rated')}
-            className={`px-4 py-2 rounded-lg font-medium transition ${
+            className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition ${
               filter === 'rated'
                 ? 'bg-blue-600 text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
           >
-            Rated ({ratedCount})
+            <span className="hidden sm:inline">Rated ({ratedCount})</span>
+            <span className="sm:hidden">Rated</span>
           </button>
           <button
             onClick={() => setFilter('unrated')}
-            className={`px-4 py-2 rounded-lg font-medium transition ${
+            className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition ${
               filter === 'unrated'
                 ? 'bg-blue-600 text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
           >
-            Unrated ({unratedCount})
+            <span className="hidden sm:inline">Unrated ({unratedCount})</span>
+            <span className="sm:hidden">Unrated</span>
           </button>
         </div>
       </div>
@@ -103,36 +106,36 @@ export default function HistoryList({ albums, username }: HistoryListProps) {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   #
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Album
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Artist
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" className="hidden lg:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Released
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Your Rating
+                <th scope="col" className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Rating
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                <th scope="col" className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredAlbums.map((album) => (
                 <tr key={album.id} className="hover:bg-gray-50 transition">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
                     #{album.position}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-2 sm:px-6 py-3 sm:py-4">
                     <div className="flex items-center">
                       {album.imageUrl && (
-                        <div className="flex-shrink-0 h-12 w-12 relative">
+                        <div className="flex-shrink-0 h-10 w-10 sm:h-12 sm:w-12 relative">
                           <Image
                             src={album.imageUrl}
                             alt={`${album.artist} - ${album.title}`}
@@ -142,16 +145,17 @@ export default function HistoryList({ albums, username }: HistoryListProps) {
                           />
                         </div>
                       )}
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{album.title}</div>
-                        <div className="text-sm text-gray-500">{album.releaseYear}</div>
+                      <div className="ml-2 sm:ml-4 min-w-0">
+                        <div className="text-xs sm:text-sm font-medium text-gray-900 truncate">{album.title}</div>
+                        <div className="text-xs text-gray-500 md:hidden">{album.artist}</div>
+                        <div className="text-xs text-gray-500">{album.releaseYear}</div>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {album.artist}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="hidden lg:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {album.releasedAt ? (
                       new Date(album.releasedAt).toLocaleDateString('en-US', {
                         month: 'short',
@@ -162,14 +166,14 @@ export default function HistoryList({ albums, username }: HistoryListProps) {
                       <span className="text-gray-400">Not yet</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
                     {album.isRated && album.rating ? (
                       <StarRating value={album.rating.stars} onChange={() => {}} readonly />
                     ) : (
                       <span className="text-sm text-yellow-700 font-medium">Not rated</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td className="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm">
                     <Link
                       href={`/${username}/history/${album.position}`}
                       className="text-blue-600 hover:text-blue-800 font-medium"

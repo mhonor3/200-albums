@@ -48,6 +48,18 @@ export async function GET(request: NextRequest) {
 
     const nextDay = globalState.currentDay + 1
 
+    // Find the album at this randomPosition (ensures random without replacement)
+    const nextAlbum = await prisma.album.findUnique({
+      where: { randomPosition: nextDay },
+    })
+
+    if (!nextAlbum) {
+      return NextResponse.json(
+        { error: `No album found for day ${nextDay}. Run init-random-positions script.` },
+        { status: 500 }
+      )
+    }
+
     // Update global state and set the releasedAt timestamp for the new album
     const [updatedState, updatedAlbum] = await prisma.$transaction([
       prisma.globalState.update({
@@ -57,7 +69,7 @@ export async function GET(request: NextRequest) {
         },
       }),
       prisma.album.update({
-        where: { position: nextDay },
+        where: { id: nextAlbum.id },
         data: {
           releasedAt: new Date(),
         },

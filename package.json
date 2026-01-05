@@ -12,7 +12,8 @@
     "import-albums": "tsx scripts/import-albums.ts",
     "fetch-spotify": "tsx scripts/fetch-spotify-urls.ts",
     "shuffle-albums": "tsx scripts/shuffle-albums.ts",
-    "init-first-album": "tsx scripts/init-first-album.ts"
+    "init-first-album": "tsx scripts/init-first-album.ts",
+    "init-random-positions": "tsx scripts/init-random-positions.ts"
   },
   "keywords": [],
   "author": "",

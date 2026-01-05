@@ -4,10 +4,10 @@ import Link from 'next/link'
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <div className="max-w-2xl text-center">
-        <h1 className="text-6xl font-bold mb-6">200 Albums</h1>
-        <p className="text-xl text-gray-600 mb-8">
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 sm:p-12 md:p-24">
+      <div className="max-w-2xl w-full text-center px-4">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 sm:mb-6">200 Albums</h1>
+        <p className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8">
           A synchronized daily album discovery journey
         </p>
 
@@ -20,10 +20,10 @@ export default function Home() {
               type="text"
               id="username"
               placeholder="john"
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  const username = (e.target as HTMLInputElement).value.trim()
+                  const username = (e.target as HTMLInputElement).value.trim().toLowerCase()
                   if (username) {
                     window.location.href = `/${username}`
                   }
