@@ -13,16 +13,18 @@ export default async function HistoryPage({
   const globalState = await getGlobalState()
 
   // Get all albums up to yesterday (can't rate today's album yet)
-  const maxPosition = Math.max(1, globalState.currentDay - 1)
+  // Use randomPosition since that's the generation order
+  const maxRandomPosition = Math.max(0, globalState.currentDay - 1)
 
   const albums = await prisma.album.findMany({
     where: {
-      position: {
-        lte: maxPosition,
+      randomPosition: {
+        lte: maxRandomPosition,
+        not: null,
       },
     },
     orderBy: {
-      position: 'desc',
+      randomPosition: 'desc',
     },
     include: {
       ratings: {

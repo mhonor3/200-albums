@@ -70,19 +70,27 @@ export async function getAlbumByRandomPosition(randomPosition: number) {
  * Rules:
  * - Album must be from yesterday or earlier (not today's album)
  * - User must not have already rated it
+ *
+ * Note: albumPosition is the original position field, not randomPosition
  */
 export async function canRateAlbum(userId: number, albumPosition: number) {
   const globalState = await getGlobalState()
 
-  // Can't rate today's album
-  if (albumPosition >= globalState.currentDay) {
+  // Get the album to check its randomPosition
+  const album = await getAlbumByPosition(albumPosition)
+  if (!album) return false
+
+  // Can't rate today's album (compare randomPosition with currentDay)
+  if (album.randomPosition && album.randomPosition >= globalState.currentDay) {
+    return false
+  }
+
+  // If randomPosition is not set, can't rate
+  if (!album.randomPosition) {
     return false
   }
 
   // Check if already rated
-  const album = await getAlbumByPosition(albumPosition)
-  if (!album) return false
-
   const existingRating = await prisma.rating.findUnique({
     where: {
       userId_albumId: {
