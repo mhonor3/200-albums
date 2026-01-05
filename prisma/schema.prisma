@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Global state for the journey
+model GlobalState {
+  id              Int      @id @default(1)
+  currentDay      Int      @default(1) // Current day in the journey (1-N)
+  isPaused        Boolean  @default(false)
+  journeyStartDate DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("global_state")
+}
+
+// Album catalog from CSV
+model Album {
+  id            Int      @id @default(autoincrement())
+  position      Int      @unique // 1 to N (sequential order)
+  artist        String
+  title         String
+  releaseYear   Int
+  genre         String
+  imageUrl      String?
+  rymAlbumUrl   String?
+  rymArtistUrl  String?
+  spotifyUrl    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  ratings       Rating[]
+  listeningNotes ListeningNote[]
+
+  @@index([position])
+  @@index([artist])
+  @@index([genre])
+  @@map("albums")
+}
+
+// User accounts (simple URL-based)
+model User {
+  id             Int      @id @default(autoincrement())
+  username       String   @unique
+  currentPosition Int     @default(1) // Where they are in the journey
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  ratings        Rating[]
+  listeningNotes ListeningNote[]
+
+  @@index([username])
+  @@map("users")
+}
+
+// User ratings for albums
+model Rating {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  albumId   Int
+  stars     Int      // 1-5
+  review    String   @default("") // Text review
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  album     Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, albumId])
+  @@index([albumId])
+  @@index([userId])
+  @@map("ratings")
+}
+
+// Listening notes (before rating)
+model ListeningNote {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  albumId   Int
+  note      String   @default("") // User's listening notes
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  album     Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, albumId])
+  @@index([userId])
+  @@map("listening_notes")
+}

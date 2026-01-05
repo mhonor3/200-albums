@@ -1,0 +1,51 @@
+import Link from 'next/link'
+
+export default function Home() {
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center p-24">
+      <div className="max-w-2xl text-center">
+        <h1 className="text-6xl font-bold mb-6">200 Albums</h1>
+        <p className="text-xl text-gray-600 mb-8">
+          A synchronized daily album discovery journey
+        </p>
+
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+              Enter your username to start:
+            </label>
+            <input
+              type="text"
+              id="username"
+              placeholder="john"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  const username = (e.target as HTMLInputElement).value.trim()
+                  if (username) {
+                    window.location.href = `/${username}`
+                  }
+                }
+              }}
+            />
+          </div>
+
+          <div className="pt-8 border-t border-gray-200 space-y-2">
+            <Link
+              href="/browse"
+              className="block text-blue-600 hover:text-blue-800 underline"
+            >
+              Browse All Albums
+            </Link>
+            <Link
+              href="/admin"
+              className="block text-gray-500 hover:text-gray-700 text-sm"
+            >
+              Admin Panel
+            </Link>
+          </div>
+        </div>
+      </div>
+    </main>
+  )
+}
