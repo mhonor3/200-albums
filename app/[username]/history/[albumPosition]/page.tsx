@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { getOrCreateUser, getAlbumByPosition } from '@/lib/utils'
+import { getOrCreateUser, getAlbumByPosition, getGlobalState } from '@/lib/utils'
 import Navigation from '@/components/Navigation'
 import AlbumDetail from './AlbumDetail'
 import { notFound } from 'next/navigation'
@@ -18,10 +18,14 @@ export default async function AlbumDetailPage({
 
   const user = await getOrCreateUser(username)
   const album = await getAlbumByPosition(position)
+  const globalState = await getGlobalState()
 
   if (!album) {
     notFound()
   }
+
+  // Prevent rating today's album - user can only rate yesterday and earlier
+  const canRate = position < globalState.currentDay
 
   // Get user's rating for this album
   const userRating = await prisma.rating.findUnique({
@@ -97,6 +101,7 @@ export default async function AlbumDetailPage({
           listeningNote={listeningNote?.note || ''}
           communityRatings={communityRatings}
           communityStats={communityStats}
+          canRate={canRate}
         />
       </main>
     </div>

@@ -46,19 +46,34 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Advance to next day
-    const updatedState = await prisma.globalState.update({
-      where: { id: 1 },
-      data: {
-        currentDay: globalState.currentDay + 1,
-      },
-    })
+    const nextDay = globalState.currentDay + 1
+
+    // Update global state and set the releasedAt timestamp for the new album
+    const [updatedState, updatedAlbum] = await prisma.$transaction([
+      prisma.globalState.update({
+        where: { id: 1 },
+        data: {
+          currentDay: nextDay,
+        },
+      }),
+      prisma.album.update({
+        where: { position: nextDay },
+        data: {
+          releasedAt: new Date(),
+        },
+      }),
+    ])
 
     return NextResponse.json({
       message: 'Day advanced successfully',
       previousDay: globalState.currentDay,
       currentDay: updatedState.currentDay,
       totalAlbums,
+      albumReleased: {
+        position: updatedAlbum.position,
+        title: updatedAlbum.title,
+        artist: updatedAlbum.artist,
+      },
     })
   } catch (error) {
     console.error('Cron job error:', error)

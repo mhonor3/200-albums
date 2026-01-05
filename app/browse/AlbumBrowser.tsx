@@ -166,7 +166,7 @@ export default function AlbumBrowser({ albums, genres, minYear, maxYear }: Album
               <h3 className="font-bold text-sm mb-1 line-clamp-1">{album.title}</h3>
               <p className="text-sm text-gray-700 mb-1 line-clamp-1">{album.artist}</p>
               <p className="text-xs text-gray-600 mb-3">
-                {album.releaseYear} • {album.genre}
+                {album.releaseYear} • {album.genre === 'Unknown' ? 'Genre not available' : album.genre}
               </p>
 
               <div className="flex gap-2">

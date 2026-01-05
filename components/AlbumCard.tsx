@@ -40,7 +40,7 @@ export default function AlbumCard({ album, showPosition = true }: AlbumCardProps
         <h2 className="text-2xl font-bold mb-1">{album.title}</h2>
         <p className="text-xl text-gray-700 mb-2">{album.artist}</p>
         <p className="text-sm text-gray-600 mb-4">
-          {album.releaseYear} • {album.genre}
+          {album.releaseYear} • {album.genre === 'Unknown' ? 'Genre not available' : album.genre}
         </p>
 
         <div className="flex gap-3">

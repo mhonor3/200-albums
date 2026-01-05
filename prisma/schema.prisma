@@ -21,8 +21,8 @@ model GlobalState {
 
 // Album catalog from CSV
 model Album {
-  id            Int      @id @default(autoincrement())
-  position      Int      @unique // 1 to N (sequential order)
+  id            Int       @id @default(autoincrement())
+  position      Int       @unique // 1 to N (sequential order)
   artist        String
   title         String
   releaseYear   Int
@@ -31,8 +31,9 @@ model Album {
   rymAlbumUrl   String?
   rymArtistUrl  String?
   spotifyUrl    String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  releasedAt    DateTime? // When this album was released to users (set by cron job)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   // Relations
   ratings       Rating[]

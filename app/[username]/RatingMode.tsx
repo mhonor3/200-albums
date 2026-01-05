@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import AlbumCard from '@/components/AlbumCard'
 import StarRating from '@/components/StarRating'
@@ -29,6 +29,40 @@ export default function RatingMode({ username, album, listeningNote }: RatingMod
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const storageKey = `rating-draft-${username}-${album.position}`
+
+  // Load from localStorage on mount
+  useEffect(() => {
+    const savedDraft = localStorage.getItem(storageKey)
+    if (savedDraft) {
+      try {
+        const { stars: savedStars, review: savedReview } = JSON.parse(savedDraft)
+        setStars(savedStars || 0)
+        setReview(savedReview || listeningNote)
+      } catch {
+        // If parsing fails, use defaults
+        setReview(listeningNote)
+      }
+    }
+  }, [storageKey, listeningNote])
+
+  // Autosave to localStorage with debounce
+  useEffect(() => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+    }
+
+    saveTimeoutRef.current = setTimeout(() => {
+      localStorage.setItem(storageKey, JSON.stringify({ stars, review }))
+    }, 1000)
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+    }
+  }, [stars, review, storageKey])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -56,6 +90,9 @@ export default function RatingMode({ username, album, listeningNote }: RatingMod
       if (!response.ok) {
         throw new Error('Failed to submit rating')
       }
+
+      // Clear localStorage after successful submission
+      localStorage.removeItem(storageKey)
 
       // Refresh the page to show next album
       router.refresh()
@@ -117,7 +154,7 @@ export default function RatingMode({ username, album, listeningNote }: RatingMod
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <p className="mt-1 text-sm text-gray-500">
-                Your listening notes are pre-filled here. Feel free to edit or expand.
+                Auto-saved locally. Your listening notes are pre-filled here. Feel free to edit or expand.
               </p>
             </div>
 

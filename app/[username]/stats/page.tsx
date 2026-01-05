@@ -37,11 +37,13 @@ export default async function StatsPage({
     (star) => ratings.filter((r) => r.stars === star).length
   )
 
-  // Genre breakdown
+  // Genre breakdown (exclude "Unknown" as it represents absence of genre)
   const genreCounts: Record<string, number> = {}
   ratings.forEach((rating) => {
     const genre = rating.album.genre
-    genreCounts[genre] = (genreCounts[genre] || 0) + 1
+    if (genre !== 'Unknown') {
+      genreCounts[genre] = (genreCounts[genre] || 0) + 1
+    }
   })
 
   const topGenres = Object.entries(genreCounts)

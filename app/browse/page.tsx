@@ -9,8 +9,10 @@ export default async function BrowsePage() {
     },
   })
 
-  // Get unique genres for filtering
-  const genres = Array.from(new Set(albums.map((a) => a.genre))).sort()
+  // Get unique genres for filtering (exclude "Unknown" as it represents absence of genre)
+  const genres = Array.from(new Set(albums.map((a) => a.genre)))
+    .filter((genre) => genre !== 'Unknown')
+    .sort()
 
   // Get year range
   const years = albums.map((a) => a.releaseYear)

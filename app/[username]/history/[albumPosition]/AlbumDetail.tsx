@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import AlbumCard from '@/components/AlbumCard'
@@ -46,6 +46,7 @@ interface AlbumDetailProps {
   listeningNote: string
   communityRatings: CommunityRating[]
   communityStats: CommunityStats | null
+  canRate: boolean
 }
 
 export default function AlbumDetail({
@@ -55,13 +56,49 @@ export default function AlbumDetail({
   listeningNote,
   communityRatings,
   communityStats,
+  canRate,
 }: AlbumDetailProps) {
-  const [isEditing, setIsEditing] = useState(!initialRating)
+  const [isEditing, setIsEditing] = useState(!initialRating && canRate)
   const [stars, setStars] = useState(initialRating?.stars || 0)
   const [review, setReview] = useState(initialRating?.review || listeningNote)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const storageKey = `rating-draft-${username}-${album.position}`
+
+  // Load from localStorage on mount
+  useEffect(() => {
+    const savedDraft = localStorage.getItem(storageKey)
+    if (savedDraft && !initialRating) {
+      try {
+        const { stars: savedStars, review: savedReview } = JSON.parse(savedDraft)
+        setStars(savedStars || 0)
+        setReview(savedReview || listeningNote)
+      } catch {
+        // If parsing fails, use defaults
+      }
+    }
+  }, [storageKey, listeningNote, initialRating])
+
+  // Autosave to localStorage with debounce (only when editing)
+  useEffect(() => {
+    if (!isEditing) return
+
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+    }
+
+    saveTimeoutRef.current = setTimeout(() => {
+      localStorage.setItem(storageKey, JSON.stringify({ stars, review }))
+    }, 1000)
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+    }
+  }, [stars, review, storageKey, isEditing])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -89,6 +126,9 @@ export default function AlbumDetail({
       if (!response.ok) {
         throw new Error('Failed to submit rating')
       }
+
+      // Clear localStorage after successful submission
+      localStorage.removeItem(storageKey)
 
       setIsEditing(false)
       router.refresh()

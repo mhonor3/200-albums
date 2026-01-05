@@ -15,6 +15,7 @@ interface Album {
   imageUrl: string | null
   spotifyUrl: string | null
   rymAlbumUrl: string | null
+  releasedAt: Date | null
   isRated: boolean
   rating: {
     stars: number
@@ -97,61 +98,90 @@ export default function HistoryList({ albums, username }: HistoryListProps) {
         </div>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredAlbums.map((album) => (
-          <div key={album.id} className="bg-white rounded-lg shadow hover:shadow-lg transition">
-            {album.imageUrl && (
-              <div className="relative w-full aspect-square">
-                <Image
-                  src={album.imageUrl}
-                  alt={`${album.artist} - ${album.title}`}
-                  fill
-                  className="object-cover rounded-t-lg"
-                  unoptimized
-                />
-              </div>
-            )}
-            <div className="p-4">
-              <div className="text-xs text-gray-500 mb-1">Album #{album.position}</div>
-              <h3 className="font-bold text-lg mb-1 line-clamp-1">{album.title}</h3>
-              <p className="text-gray-700 mb-1 line-clamp-1">{album.artist}</p>
-              <p className="text-sm text-gray-600 mb-3">
-                {album.releaseYear} • {album.genre}
-              </p>
-
-              {album.isRated && album.rating ? (
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <StarRating value={album.rating.stars} onChange={() => {}} readonly />
-                  </div>
-                  {album.rating.review && (
-                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-                      {album.rating.review}
-                    </p>
-                  )}
-                  <Link
-                    href={`/${username}/history/${album.position}`}
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                  >
-                    View Details →
-                  </Link>
-                </div>
-              ) : (
-                <div>
-                  <div className="bg-yellow-50 border border-yellow-200 rounded px-3 py-2 mb-3">
-                    <p className="text-sm text-yellow-800 font-medium">Not yet rated</p>
-                  </div>
-                  <Link
-                    href={`/${username}/history/${album.position}`}
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                  >
-                    Rate This Album →
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  #
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Album
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Artist
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Released
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Your Rating
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredAlbums.map((album) => (
+                <tr key={album.id} className="hover:bg-gray-50 transition">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    #{album.position}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      {album.imageUrl && (
+                        <div className="flex-shrink-0 h-12 w-12 relative">
+                          <Image
+                            src={album.imageUrl}
+                            alt={`${album.artist} - ${album.title}`}
+                            fill
+                            className="object-cover rounded"
+                            unoptimized
+                          />
+                        </div>
+                      )}
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900">{album.title}</div>
+                        <div className="text-sm text-gray-500">{album.releaseYear}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {album.artist}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {album.releasedAt ? (
+                      new Date(album.releasedAt).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })
+                    ) : (
+                      <span className="text-gray-400">Not yet</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {album.isRated && album.rating ? (
+                      <StarRating value={album.rating.stars} onChange={() => {}} readonly />
+                    ) : (
+                      <span className="text-sm text-yellow-700 font-medium">Not rated</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <Link
+                      href={`/${username}/history/${album.position}`}
+                      className="text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      {album.isRated ? 'View' : 'Rate'} →
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {filteredAlbums.length === 0 && (

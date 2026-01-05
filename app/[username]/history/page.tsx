@@ -35,6 +35,7 @@ export default async function HistoryPage({
     ...album,
     isRated: album.ratings.length > 0,
     rating: album.ratings[0] || null,
+    // releasedAt is already included from the query
   }))
 
   return (

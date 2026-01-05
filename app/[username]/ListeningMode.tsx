@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import AlbumCard from '@/components/AlbumCard'
 
 interface Album {
@@ -31,10 +31,35 @@ export default function ListeningMode({
   const [note, setNote] = useState(initialNote)
   const [isSaving, setIsSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState<string | null>(null)
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const storageKey = `listening-note-${username}-${album.position}`
 
+  // Load from localStorage on mount
   useEffect(() => {
-    setNote(initialNote)
-  }, [initialNote])
+    const savedNote = localStorage.getItem(storageKey)
+    if (savedNote) {
+      setNote(savedNote)
+    } else {
+      setNote(initialNote)
+    }
+  }, [initialNote, storageKey])
+
+  // Autosave to localStorage with debounce
+  useEffect(() => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+    }
+
+    saveTimeoutRef.current = setTimeout(() => {
+      localStorage.setItem(storageKey, note)
+    }, 1000)
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+    }
+  }, [note, storageKey])
 
   const saveNote = async () => {
     setIsSaving(true)
@@ -55,6 +80,8 @@ export default function ListeningMode({
         throw new Error('Failed to save note')
       }
 
+      // Clear localStorage after successful save to database
+      localStorage.removeItem(storageKey)
       setSaveMessage('Note saved!')
       setTimeout(() => setSaveMessage(null), 3000)
     } catch (err) {
@@ -110,7 +137,7 @@ export default function ListeningMode({
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <p className="mt-1 text-sm text-gray-500">
-                These notes will be available when you rate this album tomorrow.
+                Auto-saved locally. Click &quot;Save Notes&quot; to sync to server. These notes will be available when you rate this album tomorrow.
               </p>
             </div>
 
