@@ -177,12 +177,42 @@ Make sure to set the `CRON_SECRET` environment variable in Vercel for security.
 - **Community Ratings** - See other users' ratings after rating yourself
 - **Admin Panel** - Pause/unpause global journey
 
+## Database & Backup
+
+This project uses **Neon PostgreSQL** with comprehensive backup systems.
+
+### Backup & Recovery
+
+See [docs/BACKUP_GUIDE.md](docs/BACKUP_GUIDE.md) for complete backup and disaster recovery procedures.
+
+**Quick reference:**
+```bash
+# Create manual backup
+npm run backup
+
+# Restore from backup
+npm run restore backup-file.json
+```
+
+**Automated backups:**
+- Neon PITR: 6-hour point-in-time recovery
+- GitHub Actions: Daily automated backups (90-day retention)
+- Manual scripts: On-demand backups before risky operations
+
+### Database Branching
+
+See [docs/NEON_BRANCHING_GUIDE.md](docs/NEON_BRANCHING_GUIDE.md) for using database branches for dev/prod separation.
+
+### CI/CD Setup
+
+See [docs/CI_CD_SETUP.md](docs/CI_CD_SETUP.md) for automatic database branching that mirrors your GitHub workflow.
+
 ## Tech Stack
 
 - Next.js 14+ (App Router)
 - TypeScript
 - Tailwind CSS
-- PostgreSQL
+- Neon PostgreSQL
 - Prisma ORM
 - Vercel Cron
 
