@@ -11,9 +11,12 @@
     "postinstall": "prisma generate",
     "import-albums": "tsx scripts/import-albums.ts",
     "fetch-spotify": "tsx scripts/fetch-spotify-urls.ts",
-    "shuffle-albums": "tsx scripts/shuffle-albums.ts",
     "init-first-album": "tsx scripts/init-first-album.ts",
-    "init-random-positions": "tsx scripts/init-random-positions.ts"
+    "shuffle-unreleased": "tsx scripts/shuffle-unreleased.ts",
+    "add-albums": "tsx scripts/add-albums.ts",
+    "delete-albums": "tsx scripts/delete-albums.ts",
+    "backup": "tsx scripts/export-data.ts",
+    "restore": "tsx scripts/import-data.ts"
   },
   "keywords": [],
   "author": "",

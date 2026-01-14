@@ -48,59 +48,12 @@ export async function getGlobalState() {
 }
 
 /**
- * Get the album for a specific position (original import order)
+ * Get the album for a specific position (generation order)
  */
 export async function getAlbumByPosition(position: number) {
   return await prisma.album.findUnique({
     where: { position },
   })
-}
-
-/**
- * Get the album for a specific random position (generation order)
- */
-export async function getAlbumByRandomPosition(randomPosition: number) {
-  return await prisma.album.findUnique({
-    where: { randomPosition },
-  })
-}
-
-/**
- * Check if user can rate an album
- * Rules:
- * - Album must be from yesterday or earlier (not today's album)
- * - User must not have already rated it
- *
- * Note: albumPosition is the original position field, not randomPosition
- */
-export async function canRateAlbum(userId: number, albumPosition: number) {
-  const globalState = await getGlobalState()
-
-  // Get the album to check its randomPosition
-  const album = await getAlbumByPosition(albumPosition)
-  if (!album) return false
-
-  // Can't rate today's album (compare randomPosition with currentDay)
-  if (album.randomPosition && album.randomPosition >= globalState.currentDay) {
-    return false
-  }
-
-  // If randomPosition is not set, can't rate
-  if (!album.randomPosition) {
-    return false
-  }
-
-  // Check if already rated
-  const existingRating = await prisma.rating.findUnique({
-    where: {
-      userId_albumId: {
-        userId,
-        albumId: album.id,
-      },
-    },
-  })
-
-  return !existingRating
 }
 
 /**
@@ -111,16 +64,16 @@ export async function getUserCurrentState(username: string) {
   const user = await getOrCreateUser(username)
   const globalState = await getGlobalState()
 
-  // Find the first unrated album from their current position backward (using randomPosition)
+  // Find the first unrated released album (using position and isReleased)
   const albums = await prisma.album.findMany({
     where: {
-      randomPosition: {
+      position: {
         lte: user.currentPosition,
-        not: null,
       },
+      isReleased: true,
     },
     orderBy: {
-      randomPosition: 'desc',
+      position: 'desc',
     },
     include: {
       ratings: {
@@ -137,7 +90,8 @@ export async function getUserCurrentState(username: string) {
 
   if (unratedAlbum) {
     // User needs to rate this album
-    const canRate = (unratedAlbum.randomPosition ?? 0) < globalState.currentDay
+    // Can rate if it's not today's album (position < currentDay)
+    const canRate = unratedAlbum.position < globalState.currentDay
 
     return {
       mode: canRate ? 'rating' : 'listening' as const,
@@ -149,7 +103,7 @@ export async function getUserCurrentState(username: string) {
   }
 
   // User is caught up - show today's album
-  const todayAlbum = await getAlbumByRandomPosition(globalState.currentDay)
+  const todayAlbum = await getAlbumByPosition(globalState.currentDay)
 
   if (!todayAlbum) {
     return {

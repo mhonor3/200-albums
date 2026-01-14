@@ -39,9 +39,9 @@ A synchronized daily album discovery app where all users progress through the sa
 
 Open [http://localhost:3000](http://localhost:3000) to see the app.
 
-## Album Data Import
+## Album Management
 
-### CSV Format
+### Initial Setup: Importing Albums
 
 Your CSV file should have the following columns:
 - `position` - Sequential number (1 to N)
@@ -55,21 +55,100 @@ Your CSV file should have the following columns:
 
 Place your CSV file at `public/data/albums.csv`
 
-### Import Script
-
-Run the import script to load albums into the database:
+**Import Script:**
 ```bash
 npm run import-albums
 ```
 
-### Spotify URL Script
-
+**Fetch Spotify URLs:**
 After importing albums, run the Spotify URL fetcher:
 ```bash
 npm run fetch-spotify-urls
 ```
 
 This will automatically fetch Spotify URLs for all albums based on artist and title.
+
+**Initialize First Album:**
+To start the journey with day 1:
+```bash
+npm run init-first-album
+```
+
+### Managing Albums (Add/Delete/Shuffle)
+
+The app uses an `isReleased` flag to track which albums have been released to users. Released albums are **frozen** and cannot be deleted or shuffled. Only unreleased albums can be managed.
+
+#### Adding New Albums
+
+Add new albums from a CSV file:
+
+```bash
+npm run add-albums path/to/albums.csv
+```
+
+**CSV Format:**
+```csv
+artist,title,releaseYear,genre
+The Beatles,Abbey Road,1969,Rock
+Pink Floyd,Dark Side of the Moon,1973,Progressive Rock
+```
+
+Optional columns: `imageUrl`, `rymAlbumUrl`, `rymArtistUrl`, `spotifyUrl`
+
+Albums are automatically added to the end of the queue as unreleased.
+
+#### Deleting Albums
+
+Delete unreleased albums by position:
+
+```bash
+npm run delete-albums 150 151 152
+```
+
+This will:
+1. Show full album details (title, artist, year, genre)
+2. Ask for confirmation (type "yes" to proceed)
+3. Prevent deletion of released albums
+4. Delete the specified albums
+
+After deletion, run the shuffle script to compact positions:
+
+```bash
+npm run shuffle-unreleased
+```
+
+#### Shuffling Album Order
+
+Shuffle unreleased albums and compact positions:
+
+```bash
+npm run shuffle-unreleased
+```
+
+This will:
+- Keep released albums at positions 1-N (unchanged)
+- Shuffle unreleased albums starting from position N+1
+- Automatically remove gaps from deleted albums
+- Uses Fisher-Yates algorithm for true randomization
+
+**Example Workflow:**
+
+```bash
+# Add new albums
+npm run add-albums new-albums.csv
+
+# Delete unwanted albums
+npm run delete-albums 180 181
+
+# Shuffle the order
+npm run shuffle-unreleased
+```
+
+### Album Release System
+
+- **Released albums** (`isReleased = true`): Frozen at positions 1-N, cannot be modified
+- **Unreleased albums** (`isReleased = false`): Can be added, deleted, or shuffled
+- **History is preserved**: User ratings and progress are never affected by managing unreleased albums
 
 ## Deployment
 

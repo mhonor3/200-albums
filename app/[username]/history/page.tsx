@@ -12,19 +12,16 @@ export default async function HistoryPage({
   const user = await getOrCreateUser(username)
   const globalState = await getGlobalState()
 
-  // Get all albums up to yesterday (can't rate today's album yet)
-  // Use randomPosition since that's the generation order
-  const maxRandomPosition = Math.max(0, globalState.currentDay - 1)
-
+  // Get all released albums except today's album
   const albums = await prisma.album.findMany({
     where: {
-      randomPosition: {
-        lte: maxRandomPosition,
-        not: null,
+      isReleased: true,
+      position: {
+        lt: globalState.currentDay, // Only albums before today
       },
     },
     orderBy: {
-      randomPosition: 'desc',
+      position: 'desc',
     },
     include: {
       ratings: {

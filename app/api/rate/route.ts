@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getOrCreateUser, canRateAlbum } from '@/lib/utils'
+import { getOrCreateUser } from '@/lib/utils'
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,9 +36,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if user can rate this album
-    const canRate = await canRateAlbum(user.id, albumPosition)
-    if (!canRate) {
+    // Check if album can be rated
+    const globalState = await prisma.globalState.findUnique({ where: { id: 1 } })
+    if (!globalState) {
+      return NextResponse.json(
+        { error: 'System not initialized' },
+        { status: 500 }
+      )
+    }
+
+    // Can't rate today's album (must be released and before current day)
+    if (!album.isReleased || album.position >= globalState.currentDay) {
       return NextResponse.json(
         { error: 'Cannot rate this album yet' },
         { status: 403 }
@@ -66,8 +74,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Update user's current position if needed
-    const globalState = await prisma.globalState.findUnique({ where: { id: 1 } })
-    if (globalState && user.currentPosition < globalState.currentDay) {
+    if (user.currentPosition < globalState.currentDay) {
       await prisma.user.update({
         where: { id: user.id },
         data: { currentPosition: globalState.currentDay },

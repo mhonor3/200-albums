@@ -25,7 +25,8 @@ export default async function AlbumDetailPage({
   }
 
   // Prevent rating today's album - user can only rate yesterday and earlier
-  const canRate = position < globalState.currentDay
+  // Check if album is released and not today's album
+  const canRate = album.isReleased && album.position < globalState.currentDay
 
   // Get user's rating for this album
   const userRating = await prisma.rating.findUnique({

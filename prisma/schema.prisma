@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("NEON_DATABASE_URL")
 }
 
 // Global state for the journey
@@ -22,8 +22,7 @@ model GlobalState {
 // Album catalog from CSV
 model Album {
   id            Int       @id @default(autoincrement())
-  position      Int       @unique // 1 to N (sequential order in original import)
-  randomPosition Int?     @unique // Random order for generation (1 to N, set once)
+  position      Int       @unique // Generation order (1 to N), can be shuffled for unreleased albums
   artist        String
   title         String
   releaseYear   Int
@@ -32,6 +31,7 @@ model Album {
   rymAlbumUrl   String?
   rymArtistUrl  String?
   spotifyUrl    String?
+  isReleased    Boolean   @default(false) // Whether this album has been released to users (frozen once true)
   releasedAt    DateTime? // When this album was released to users (set by cron job)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -41,7 +41,7 @@ model Album {
   listeningNotes ListeningNote[]
 
   @@index([position])
-  @@index([randomPosition])
+  @@index([isReleased])
   @@index([artist])
   @@index([genre])
   @@map("albums")
