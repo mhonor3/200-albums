@@ -29,6 +29,14 @@ export async function POST() {
       prisma.rating.deleteMany({}),
       // Delete all listening notes
       prisma.listeningNote.deleteMany({}),
+      // Mark album 1 as released (it's the current day's album)
+      prisma.album.update({
+        where: { position: 1 },
+        data: {
+          isReleased: true,
+          releasedAt: new Date(),
+        },
+      }),
     ])
 
     return NextResponse.json({
