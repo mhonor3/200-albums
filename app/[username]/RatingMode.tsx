@@ -120,6 +120,7 @@ export default function RatingMode({ username, album, listeningNote }: RatingMod
 
       // Clear localStorage after successful skip
       localStorage.removeItem(storageKey)
+      setIsSkipping(false)
 
       // Refresh the page to show today's album
       router.refresh()

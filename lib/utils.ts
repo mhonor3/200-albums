@@ -64,17 +64,9 @@ export async function getUserCurrentState(username: string) {
   const user = await getOrCreateUser(username)
   const globalState = await getGlobalState()
 
-  // Find the first unrated released album (using position and isReleased)
-  const albums = await prisma.album.findMany({
-    where: {
-      position: {
-        lte: user.currentPosition,
-      },
-      isReleased: true,
-    },
-    orderBy: {
-      position: 'desc',
-    },
+  // Get the album at user's current position (their last "revealed" album)
+  const currentAlbum = await prisma.album.findUnique({
+    where: { position: user.currentPosition },
     include: {
       ratings: {
         where: { userId: user.id },
@@ -85,27 +77,8 @@ export async function getUserCurrentState(username: string) {
     },
   })
 
-  // Find first unrated album
-  const unratedAlbum = albums.find(album => album.ratings.length === 0)
-
-  if (unratedAlbum) {
-    // User needs to rate this album
-    // Can rate if it's not today's album (position < currentDay)
-    const canRate = unratedAlbum.position < globalState.currentDay
-
-    return {
-      mode: canRate ? 'rating' : 'listening' as const,
-      album: unratedAlbum,
-      user,
-      globalState,
-      listeningNote: unratedAlbum.listeningNotes[0]?.note || '',
-    }
-  }
-
-  // User is caught up - show today's album
-  const todayAlbum = await getAlbumByPosition(globalState.currentDay)
-
-  if (!todayAlbum) {
+  if (!currentAlbum) {
+    // No album at current position - journey complete
     return {
       mode: 'completed' as const,
       album: null,
@@ -115,21 +88,27 @@ export async function getUserCurrentState(username: string) {
     }
   }
 
-  const listeningNote = await prisma.listeningNote.findUnique({
-    where: {
-      userId_albumId: {
-        userId: user.id,
-        albumId: todayAlbum.id,
-      },
-    },
-  })
+  // If this album is from a past day and unrated, show rating mode
+  const isFromPastDay = currentAlbum.position < globalState.currentDay
+  const isUnrated = currentAlbum.ratings.length === 0
 
+  if (isFromPastDay && isUnrated && currentAlbum.isReleased) {
+    return {
+      mode: 'rating' as const,
+      album: currentAlbum,
+      user,
+      globalState,
+      listeningNote: currentAlbum.listeningNotes[0]?.note || '',
+    }
+  }
+
+  // Otherwise, show in listening mode
   return {
     mode: 'listening' as const,
-    album: todayAlbum,
+    album: currentAlbum,
     user,
     globalState,
-    listeningNote: listeningNote?.note || '',
+    listeningNote: currentAlbum.listeningNotes[0]?.note || '',
   }
 }
 

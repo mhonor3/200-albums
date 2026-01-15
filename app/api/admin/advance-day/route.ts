@@ -23,16 +23,45 @@ export async function POST() {
       )
     }
 
-    const updated = await prisma.globalState.update({
-      where: { id: 1 },
-      data: {
-        currentDay: globalState.currentDay + 1,
-      },
+    const nextDay = globalState.currentDay + 1
+
+    // Find the album at this position
+    const nextAlbum = await prisma.album.findUnique({
+      where: { position: nextDay },
     })
+
+    if (!nextAlbum) {
+      return NextResponse.json(
+        { error: `No album found for day ${nextDay}` },
+        { status: 500 }
+      )
+    }
+
+    // Update global state and mark the album as released (same as cron job)
+    const [updatedState, updatedAlbum] = await prisma.$transaction([
+      prisma.globalState.update({
+        where: { id: 1 },
+        data: {
+          currentDay: nextDay,
+        },
+      }),
+      prisma.album.update({
+        where: { id: nextAlbum.id },
+        data: {
+          isReleased: true,
+          releasedAt: new Date(),
+        },
+      }),
+    ])
 
     return NextResponse.json({
       success: true,
-      globalState: updated,
+      globalState: updatedState,
+      albumReleased: {
+        position: updatedAlbum.position,
+        title: updatedAlbum.title,
+        artist: updatedAlbum.artist,
+      },
     })
   } catch (error) {
     console.error('Advance day error:', error)
