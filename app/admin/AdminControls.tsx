@@ -89,7 +89,7 @@ export default function AdminControls({
   }
 
   const resetJourney = async () => {
-    if (!confirm('Reset journey to day 1? This will NOT delete user ratings.')) {
+    if (!confirm('Reset journey to day 1? This will DELETE all ratings and listening notes. User accounts will remain.')) {
       return
     }
 
