@@ -3,7 +3,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: '200 Albums',
-  description: 'A synchronized daily album discovery journey',
+  description: 'A daily album discovery journey',
 }
 
 export default function RootLayout({
