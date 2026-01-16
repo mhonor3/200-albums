@@ -44,3 +44,9 @@ backups/
 backup-*.json
 *.sql
 *.sql.gz
+
+#claude
+.claude
+
+#data 
+public/data/
