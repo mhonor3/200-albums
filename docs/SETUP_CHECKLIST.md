@@ -24,7 +24,7 @@ Go to: https://github.com/mhonor3/200-albums/settings/secrets/actions
 
 **Secrets (encrypted):**
 - [ ] `NEON_DATABASE_URL`
-  - Value: `postgresql://neondb_owner:npg_oUysMa1NiLt2@ep-spring-cell-ahqacl39-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require`
+  - Value: `***`
   - Used by: Daily backup workflow
 
 - [ ] `NEON_API_KEY`
