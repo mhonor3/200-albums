@@ -3,6 +3,9 @@ import { getGlobalState } from '@/lib/utils'
 import Link from 'next/link'
 import AdminControls from './AdminControls'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function AdminPage() {
   const globalState = await getGlobalState()
   const totalAlbums = await prisma.album.count()

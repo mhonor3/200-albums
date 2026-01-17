@@ -3,6 +3,9 @@ import { getOrCreateUser, getGlobalState } from '@/lib/utils'
 import Navigation from '@/components/Navigation'
 import HistoryList from './HistoryList'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function HistoryPage({
   params,
 }: {

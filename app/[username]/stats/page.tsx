@@ -3,6 +3,9 @@ import { getOrCreateUser, getGlobalState } from '@/lib/utils'
 import Navigation from '@/components/Navigation'
 import StatsDisplay from './StatsDisplay'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function StatsPage({
   params,
 }: {

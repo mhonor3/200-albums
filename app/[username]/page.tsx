@@ -5,6 +5,9 @@ import ListeningMode from './ListeningMode'
 import CompletedMode from './CompletedMode'
 import { notFound } from 'next/navigation'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function UserPage({
   params,
 }: {
