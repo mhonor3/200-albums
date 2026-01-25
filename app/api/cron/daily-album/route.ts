@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 
 /**
  * Cron job to advance the global album day
- * Should run at midnight UTC every day
+ * Should run at midnight EST every day
  */
 export async function GET(request: NextRequest) {
   try {
