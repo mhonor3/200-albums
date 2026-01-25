@@ -131,6 +131,7 @@ export default function AlbumDetail({
       localStorage.removeItem(storageKey)
 
       setIsEditing(false)
+      setIsSubmitting(false)
       router.refresh()
     } catch (err) {
       setError('Failed to submit rating. Please try again.')

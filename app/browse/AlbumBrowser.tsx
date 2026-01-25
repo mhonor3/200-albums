@@ -27,7 +27,7 @@ export default function AlbumBrowser({ albums, genres, minYear, maxYear }: Album
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedGenre, setSelectedGenre] = useState<string>('all')
   const [yearRange, setYearRange] = useState<[number, number]>([minYear, maxYear])
-  const [sortBy, setSortBy] = useState<'position' | 'artist' | 'year'>('position')
+  const [sortBy, setSortBy] = useState<'title' | 'position' | 'artist' | 'year'>('title')
 
   const filteredAndSortedAlbums = useMemo(() => {
     let filtered = albums.filter((album) => {
@@ -49,8 +49,10 @@ export default function AlbumBrowser({ albums, genres, minYear, maxYear }: Album
         return a.position - b.position
       } else if (sortBy === 'artist') {
         return a.artist.localeCompare(b.artist)
-      } else {
+      } else if (sortBy == 'year') {
         return b.releaseYear - a.releaseYear
+      } else {
+        return a.title.localeCompare(b.title)
       }
     })
 
@@ -117,9 +119,10 @@ export default function AlbumBrowser({ albums, genres, minYear, maxYear }: Album
             <label className="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'position' | 'artist' | 'year')}
+              onChange={(e) => setSortBy(e.target.value as 'position' | 'artist' | 'year' | 'title')}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
+              <option value="title">Title</option>
               <option value="position">Position</option>
               <option value="artist">Artist</option>
               <option value="year">Year (Newest First)</option>
@@ -131,12 +134,13 @@ export default function AlbumBrowser({ albums, genres, minYear, maxYear }: Album
           <p className="text-sm text-gray-600">
             Showing {filteredAndSortedAlbums.length} of {albums.length} albums
           </p>
-          {(searchTerm || selectedGenre !== 'all' || yearRange[0] !== minYear || yearRange[1] !== maxYear) && (
+          {(searchTerm || selectedGenre !== 'all' || yearRange[0] !== minYear || yearRange[1] !== maxYear || sortBy !== 'title') && (
             <button
               onClick={() => {
                 setSearchTerm('')
                 setSelectedGenre('all')
                 setYearRange([minYear, maxYear])
+                setSortBy('title')
               }}
               className="text-sm text-blue-600 hover:text-blue-800 font-medium"
             >
@@ -204,6 +208,7 @@ export default function AlbumBrowser({ albums, genres, minYear, maxYear }: Album
               setSearchTerm('')
               setSelectedGenre('all')
               setYearRange([minYear, maxYear])
+              setSortBy('position')
             }}
             className="mt-4 text-blue-600 hover:text-blue-800 font-medium"
           >

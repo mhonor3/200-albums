@@ -6,15 +6,10 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export default async function BrowsePage() {
-  const albums = await prisma.album.findMany({
-    orderBy: {
-      position: 'asc',
-    },
-  })
+  const albums = await prisma.album.findMany()
 
   // Get unique genres for filtering (exclude "Unknown" as it represents absence of genre)
   const genres = Array.from(new Set(albums.map((a) => a.genre)))
-    .filter((genre) => genre !== 'Unknown')
     .sort()
 
   // Get year range
@@ -50,7 +45,6 @@ export default async function BrowsePage() {
           <h1 className="text-3xl font-bold mb-2">Browse All Albums</h1>
           <p className="text-gray-600">Explore the complete album catalog</p>
         </div>
-
         <AlbumBrowser albums={albums} genres={genres} minYear={minYear} maxYear={maxYear} />
       </main>
     </div>
