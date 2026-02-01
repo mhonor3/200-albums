@@ -1,8 +1,9 @@
-import { getUserCurrentState } from '@/lib/utils'
+import { getUserCurrentState, checkUserExists } from '@/lib/utils'
 import Navigation from '@/components/Navigation'
 import RatingMode from './RatingMode'
 import ListeningMode from './ListeningMode'
 import CompletedMode from './CompletedMode'
+import NewUserConfirm from './NewUserConfirm'
 import { notFound } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
@@ -31,6 +32,12 @@ export default async function UserPage({
   const validUsernamePattern = /^[a-z0-9_-]+$/i
   if (!validUsernamePattern.test(username)) {
     notFound()
+  }
+
+  // Check if user exists - if not, show confirmation
+  const userExists = await checkUserExists(username)
+  if (!userExists) {
+    return <NewUserConfirm username={username.toLowerCase().trim()} />
   }
 
   const state = await getUserCurrentState(username)
