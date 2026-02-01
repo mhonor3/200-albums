@@ -39,6 +39,7 @@ model Album {
   // Relations
   ratings       Rating[]
   listeningNotes ListeningNote[]
+  notifications Notification[]
 
   @@index([position])
   @@index([isReleased])
@@ -58,6 +59,7 @@ model User {
   // Relations
   ratings        Rating[]
   listeningNotes ListeningNote[]
+  notificationsCreated Notification[] @relation("NotificationActor")
 
   @@index([username])
   @@map("users")
@@ -99,4 +101,23 @@ model ListeningNote {
   @@unique([userId, albumId])
   @@index([userId])
   @@map("listening_notes")
+}
+
+// Notifications for user activity (ratings/reviews)
+model Notification {
+  id          Int      @id @default(autoincrement())
+  type        String   // "rating" or "review"
+  actorId     Int      // User who performed the action
+  albumId     Int      // Album that was rated/reviewed
+  stars       Int      // Rating stars (for display)
+  createdAt   DateTime @default(now())
+  viewerIds   Int[]    @default([]) // User IDs who have viewed this
+
+  // Relations
+  actor       User     @relation("NotificationActor", fields: [actorId], references: [id], onDelete: Cascade)
+  album       Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([actorId])
+  @@map("notifications")
 }

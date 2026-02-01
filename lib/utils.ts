@@ -1,6 +1,18 @@
 import { prisma } from './prisma'
 
 /**
+ * Check if a user exists by username (case-insensitive)
+ */
+export async function checkUserExists(username: string) {
+  const normalizedUsername = username.toLowerCase().trim()
+  const user = await prisma.user.findUnique({
+    where: { username: normalizedUsername },
+    select: { id: true },
+  })
+  return !!user
+}
+
+/**
  * Get or create a user by username (case-insensitive)
  */
 export async function getOrCreateUser(username: string) {

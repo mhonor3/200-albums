@@ -1,4 +1,7 @@
+'use client'
+
 import Link from 'next/link'
+import NotificationBell from './NotificationBell'
 
 interface NavigationProps {
   username: string
@@ -47,12 +50,7 @@ export default function Navigation({ username, currentPage = 'current' }: Naviga
             >
               Stats
             </Link>
-            <Link
-              href="/"
-              className="px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-100 border border-gray-300"
-            >
-              Home
-            </Link>
+            <NotificationBell username={username} />
           </div>
         </div>
       </div>
