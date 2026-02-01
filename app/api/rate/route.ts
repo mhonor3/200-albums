@@ -53,6 +53,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Check if rating already exists (to determine if this is new or update)
+    const existingRating = await prisma.rating.findUnique({
+      where: {
+        userId_albumId: {
+          userId: user.id,
+          albumId: album.id,
+        },
+      },
+    })
+
     // Create or update rating
     const rating = await prisma.rating.upsert({
       where: {
@@ -72,6 +82,29 @@ export async function POST(request: NextRequest) {
         review: review || '',
       },
     })
+
+    // Create notification for new ratings or significant edits
+    const isNewRating = !existingRating
+    let shouldNotify = isNewRating
+
+    if (!isNewRating && existingRating) {
+      // For edits: notify if 24+ hours since creation OR 2+ hours since last update
+      const hoursSinceCreation = (Date.now() - existingRating.createdAt.getTime()) / (1000 * 60 * 60)
+      const hoursSinceUpdate = (Date.now() - existingRating.updatedAt.getTime()) / (1000 * 60 * 60)
+      shouldNotify = hoursSinceCreation >= 24 || hoursSinceUpdate >= 2
+    }
+
+    if (shouldNotify) {
+      await prisma.notification.create({
+        data: {
+          type: review?.trim() ? 'review' : 'rating',
+          actorId: user.id,
+          albumId: album.id,
+          stars,
+          viewerIds: [user.id], // Actor already "saw" their own action
+        },
+      })
+    }
 
     // Update user's current position if needed
     if (user.currentPosition < globalState.currentDay) {
