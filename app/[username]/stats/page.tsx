@@ -40,19 +40,27 @@ export default async function StatsPage({
     (star) => ratings.filter((r) => r.stars === star).length
   )
 
-  // Genre breakdown (exclude "Unknown" as it represents absence of genre)
-  const genreCounts: Record<string, number> = {}
+  // Genre breakdown - calculate average rating per genre (exclude "Unknown")
+  const genreStats: Record<string, { totalStars: number; count: number }> = {}
   ratings.forEach((rating) => {
     const genre = rating.album.genre
     if (genre !== 'Unknown') {
-      genreCounts[genre] = (genreCounts[genre] || 0) + 1
+      if (!genreStats[genre]) {
+        genreStats[genre] = { totalStars: 0, count: 0 }
+      }
+      genreStats[genre].totalStars += rating.stars
+      genreStats[genre].count += 1
     }
   })
 
-  const topGenres = Object.entries(genreCounts)
-    .sort((a, b) => b[1] - a[1])
+  const topGenres = Object.entries(genreStats)
+    .map(([genre, stats]) => ({
+      genre,
+      averageRating: stats.totalStars / stats.count,
+      count: stats.count,
+    }))
+    .sort((a, b) => b.averageRating - a.averageRating)
     .slice(0, 5)
-    .map(([genre, count]) => ({ genre, count }))
 
   // Progress tracking
   const currentDay = globalState.currentDay

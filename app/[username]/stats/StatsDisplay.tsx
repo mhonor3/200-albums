@@ -7,7 +7,7 @@ interface StatsDisplayProps {
   ratedCount: number
   averageRating: number
   starDistribution: number[]
-  topGenres: Array<{ genre: string; count: number }>
+  topGenres: Array<{ genre: string; averageRating: number; count: number }>
   progressPercentage: number
   daysRemaining: number
   estimatedCompletion: string | null
@@ -121,12 +121,12 @@ export default function StatsDisplay({
         </div>
 
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold mb-4">Top Genres</h2>
+          <h2 className="text-xl font-bold mb-4">Top Rated Genres</h2>
 
           {topGenres.length > 0 ? (
             <div className="space-y-4">
-              {topGenres.map(({ genre, count }, index) => {
-                const percentage = (count / ratedCount) * 100
+              {topGenres.map(({ genre, averageRating, count }, index) => {
+                const percentage = (averageRating / 5) * 100
 
                 return (
                   <div key={genre}>
@@ -134,7 +134,9 @@ export default function StatsDisplay({
                       <span className="font-medium text-gray-700">
                         {index + 1}. {genre}
                       </span>
-                      <span className="text-sm text-gray-600">{count} albums</span>
+                      <span className="text-sm text-gray-600">
+                        {averageRating.toFixed(2)} ★ ({count} albums)
+                      </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-3">
                       <div
